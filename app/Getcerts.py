@@ -1,7 +1,7 @@
 import socket # tcp conntion to the server.
 import time 
 import ssl #TLS connection to the server
-Domain="facebook.com" # Only host name is required for the connection, not the full URL.
+ # Only host name is required for the connection, not the full URL.
 
 Cert_data= {
     
@@ -16,7 +16,7 @@ Cert_data= {
 }
 
 
-def socket_connection():
+def socket_connection(Domain):
     try:
         ssl_context=ssl.create_default_context() # Gets the rulebook for the TLS connection, including the CA certificates to verify the server's certificate.
         print("1. Context created. Verify mode:", ssl_context.verify_mode,
