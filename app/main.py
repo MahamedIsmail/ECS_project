@@ -1,13 +1,14 @@
 from flask import Flask, render_template, request
 from Getcerts import socket_connection
 from Store_data import store_data,list_data,delet_data
+from validator import clean_domain, resolve_public_ip, InvalidDomain   
 
 
 app = Flask(__name__)
 app.json.sort_keys = False
 
-def get_certificate(domain):
-   Data=socket_connection(domain)
+def get_certificate(domain,ip):
+   Data=socket_connection(domain,ip)
    return store_data(Data)
 
 @app.route("/")
@@ -17,12 +18,16 @@ def index():
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    domain_name = request.form.get('domain')
-    
-    if not domain_name:
-        return "Please provide a valid domain.", 400
-   
-    return  get_certificate(domain_name)
+    raw = request.form.get("domain", "")
+
+    try:                                         
+        domain = clean_domain(raw)
+        ip = resolve_public_ip(domain)
+    except InvalidDomain as err:
+        return {"error": str(err), "input": raw}, 400
+
+    return get_certificate(domain, ip), 201
+
 
 
 @app.route("/DB")
@@ -30,7 +35,7 @@ def Display_DB():
   
   return list_data()
 
-@app.route("/Health")
+@app.route("/health")
 def health_check():
     return { "status" :"ok" }
 

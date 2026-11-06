@@ -1,7 +1,12 @@
 import uuid
 
 Data_base = []
-DB_block= {
+
+
+
+def store_data(data):
+    
+    DB_block= {
     
         "id": "a1b2c3", 
         "domain": "",
@@ -13,10 +18,6 @@ DB_block= {
         "error_message": "" 
        
 }
-
-
-def store_data(data):
-    
     error_flag,Cert_data=data
     print("Storing data:", data)
     print ("new id generated:", str(uuid.uuid4()))
@@ -28,6 +29,8 @@ def store_data(data):
     if error_flag == True:
           DB_block["error"]=True
           DB_block["error_message"]=Cert_data["error_message"]
+          DB_block["last_checked"]=Cert_data["last_checked"]
+          
           Data_base.append(DB_block) #save the data to the database even if there was an error, so that it can be retrieved later for debugging or analysis.
           return DB_block
     

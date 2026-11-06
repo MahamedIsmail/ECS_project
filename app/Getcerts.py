@@ -3,7 +3,12 @@ import time
 import ssl #TLS connection to the server
  # Only host name is required for the connection, not the full URL.
 
-Cert_data= {
+
+
+
+def socket_connection(Domain,IP):
+    
+    Cert_data= {
     
          
         "domain": "",
@@ -14,14 +19,11 @@ Cert_data= {
         "error_message": ""
        
 }
-
-
-def socket_connection(Domain):
     try:
         ssl_context=ssl.create_default_context() # Gets the rulebook for the TLS connection, including the CA certificates to verify the server's certificate.
         print("1. Context created. Verify mode:", ssl_context.verify_mode,
             "| Check hostname:", ssl_context.check_hostname)
-        with socket.create_connection ( (Domain,443) , timeout=5) as sock: # Make a TCP connection to the server. The socket is automatically closed when the block ends.
+        with socket.create_connection ( (IP,443) , timeout=5) as sock: # Make a TCP connection to the server. The socket is automatically closed when the block ends.
             print("\n2. TCP connected (no encryption yet)")
             print("   My side (IP, port):    ", sock.getsockname())
             print("   Server side (IP, port):", sock.getpeername())
@@ -46,7 +48,8 @@ def socket_connection(Domain):
 
     except Exception as e:
         print("Error occurred:", e)
-        
+        last_checked = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        Cert_data["last_checked"]=last_checked
         error_flag = True
         error_message = str(e)
         Cert_data["domain"]= Domain
