@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Expiry Radar</title>
+  <style>
+    :root {
+      --bg: #f4f5f7; --panel: #ffffff; --line: #e2e4e8; --text: #1f2328; --muted: #6a737d;
+      --ok: #1a7f37; --warn: #b26b00; --crit: #cf222e; --fail: #57606a;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+    h1 { margin: 0 0 1rem; font-size: 1.3rem; }
+
+    .summary { display: flex; flex-wrap: wrap; gap: 1.25rem; margin-bottom: 1rem; color: var(--muted); font-size: .9rem; }
+    .summary b { color: var(--text); }
+    .summary .ok b { color: var(--ok); } .summary .warning b { color: var(--warn); }
+    .summary .critical b { color: var(--crit); } .summary .failed b { color: var(--fail); }
+
+    .flash { padding: .6rem .8rem; border-radius: 4px; margin-bottom: .5rem; font-size: .9rem; }
+    .flash.error { background: #ffebe9; color: var(--crit); }
+    .flash.success { background: #dafbe1; color: var(--ok); }
+
+    form.add { display: flex; gap: .5rem; margin-bottom: 1rem; }
+    form.add input { flex: 1; padding: .55rem .7rem; border: 1px solid var(--line); border-radius: 4px; font: inherit; background: var(--panel); }
+    form.add button { padding: .55rem 1rem; border: 0; border-radius: 4px; background: var(--text); color: #fff; font: inherit; cursor: pointer; }
+
+    table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); }
+    th, td { padding: .6rem .8rem; text-align: left; border-bottom: 1px solid var(--line); }
+    th { font-size: .75rem; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+    .muted { color: var(--muted); }
+
+    .badge { display: inline-block; min-width: 70px; text-align: center; padding: .15rem .5rem; border-radius: 3px; color: #fff; font-size: .75rem; font-weight: 600; text-transform: uppercase; }
+    .badge.ok { background: var(--ok); } .badge.warning { background: var(--warn); }
+    .badge.critical { background: var(--crit); } .badge.failed { background: var(--fail); }
+    .days.warning { color: var(--warn); font-weight: 600; }
+    .days.critical { color: var(--crit); font-weight: 600; }
+    .err { color: var(--crit); font-size: .85rem; }
+
+    button.delete { background: none; border: 0; color: var(--muted); cursor: pointer; font: inherit; text-decoration: underline; }
+    button.delete:hover { color: var(--crit); }
+    .empty { text-align: center; color: var(--muted); padding: 2rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Expiry Radar</h1>
+
+    <div class="summary">
+      <span><b>{{ summary.total }}</b> tracked</span>
+      <span class="ok"><b>{{ summary.ok }}</b> ok</span>
+      <span class="warning"><b>{{ summary.warning }}</b> ≤ 30 days</span>
+      <span class="critical"><b>{{ summary.critical }}</b> ≤ 7 days</span>
+      <span class="failed"><b>{{ summary.failed }}</b> failed</span>
+    </div>
+
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+      <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+
+    <form class="add" action="{{ url_for('submit') }}" method="post">
+      <input name="domain" placeholder="example.com" autocomplete="off" required>
+      <button>Add</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr><th>Status</th><th>Domain</th><th>Days left</th><th>Expires</th><th>Issuer</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td><span class="badge {{ item.status }}">{{ item.status }}</span></td>
+            <td>{{ item.domain }}</td>
+            <td class="days {{ item.status }}">{% if item.error %}<span class="muted">—</span>{% else %}{{ item.days_left }}{% endif %}</td>
+            <td class="muted">{{ item.expires or "—" }}</td>
+            <td>
+              {% if item.error %}<span class="err">{{ item.error_message }}</span>
+              {% else %}<span class="muted">{{ item.issuer }}</span>{% endif %}
+            </td>
+            <td>
+              <form action="{{ url_for('delete_item', item_id=item.id) }}" method="post">
+                <button class="delete">Remove</button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="6" class="empty">No domains yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

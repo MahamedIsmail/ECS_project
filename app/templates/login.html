@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Log in · Expiry Radar</title>
+  <style>
+    :root {
+      --bg: #f4f5f7; --panel: #ffffff; --line: #e2e4e8; --text: #1f2328; --muted: #6a737d;
+      --ok: #1a7f37; --crit: #cf222e;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .wrap { max-width: 340px; margin: 15vh auto 0; padding: 0 1rem; }
+    h1 { margin: 0 0 1rem; font-size: 1.3rem; }
+
+    .flash { padding: .6rem .8rem; border-radius: 4px; margin-bottom: .5rem; font-size: .9rem; }
+    .flash.error { background: #ffebe9; color: var(--crit); }
+    .flash.success { background: #dafbe1; color: var(--ok); }
+
+    form { background: var(--panel); border: 1px solid var(--line); padding: 1rem; display: flex; flex-direction: column; gap: .75rem; }
+    label { font-size: .75rem; color: var(--muted); font-weight: 600; text-transform: uppercase; display: flex; flex-direction: column; gap: .3rem; }
+    input { padding: .55rem .7rem; border: 1px solid var(--line); border-radius: 4px; font: inherit; color: var(--text); text-transform: none; }
+    input:focus { outline: 2px solid var(--text); outline-offset: -1px; }
+    button { padding: .55rem 1rem; border: 0; border-radius: 4px; background: var(--text); color: #fff; font: inherit; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Expiry Radar</h1>
+
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+      <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+
+    <form method="post">
+      <label>Username
+        <input type="text" name="username" autocomplete="username" required autofocus>
+      </label>
+      <label>Password
+        <input type="password" name="password" autocomplete="current-password" required>
+      </label>
+      <button>Log in</button>
+    </form>
+  </div>
+</body>
+</html>

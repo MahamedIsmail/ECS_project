@@ -22,6 +22,7 @@ def store_data(data):
     print("Storing data:", data)
     print ("new id generated:", str(uuid.uuid4()))
     # Creat a new unique ID for the certificate data, including the domain name
+    
     DB_block["id"]=str(uuid.uuid4())
     DB_block["domain"]=Cert_data["domain"]
     
@@ -73,5 +74,46 @@ def list_data():
     
     print("Total number of certificates stored:", len(Data_base))
     return Data_base
+
+
+
+def sort_by_days_left(item):
+    """Failed checks first, then fewest days left first."""
+    if item["error"] or item["days_left"] in (None, ""):
+        return (0, 0)
+    return (1, item["days_left"])
+
+
+def print_data():
+    """Print all certificates as a table, sorted by days left (most urgent first)."""
+    items = sorted(Data_base, key=sort_by_days_left)
+
+    header = f"{'DOMAIN':<25}{'DAYS':>6}  {'EXPIRES':<26}{'ISSUER':<25}{'STATUS'}"
+    print(header, flush=True)
+    print("-" * len(header), flush=True)
+
+    for item in items:
+        days = "-" if item["error"] else item["days_left"]
+        status = "FAILED" if item["error"] else "OK"
+        print(
+            f"{item['domain']:<25}{days:>6}  {item['expires']:<26}{item['issuer']:<25}{status}",
+            flush=True,
+        )
+
+    print(f"\nTotal certificates: {len(items)}", flush=True)
+    return {"printed": len(items)}
+
+
+
+def status_of(item):
+    """Return the dashboard status for one item."""
+    if item["error"]:
+        return "failed"
+    days = item["days_left"]
+    if days <= 7:
+        return "critical"
+    if days <= 30:
+        return "warning"
+    return "ok"
       
     
