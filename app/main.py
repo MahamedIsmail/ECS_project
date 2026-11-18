@@ -11,6 +11,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-only-change-me")
 
 @app.get("/")
 def home():
+ 
     return redirect(url_for("login"))
 
 
@@ -63,6 +64,8 @@ def Display_DB():
     return list_data()
 
 
-@app.get("/Health")
+@app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+
